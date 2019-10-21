@@ -5,7 +5,7 @@
 #  - Client (quake2)                                     #
 #  - Server (q2ded)                                      #
 #  - Quake II Game (baseq2)                              #
-#  - Renderer libraries (gl1, gl3, soft)                 #
+#  - Renderer libraries (gl, soft)                       #
 #                                                        #
 # Base dependencies:                                     #
 #  - SDL 2.0                                             #
@@ -24,10 +24,6 @@
 
 # User configurable options
 # -------------------------
-
-# Enables HTTP support through cURL. Used for
-# HTTP download.
-WITH_CURL:=yes
 
 # Enables the optional OpenAL sound system.
 # To use it your system needs libopenal.so.1
@@ -224,11 +220,6 @@ endif
 
 # ----------
 
-# Local includes for GLAD.
-GLAD_INCLUDE = -Isrc/client/refresh/gl3/glad/include
-
-# ----------
-
 # Base LDFLAGS.
 ifeq ($(YQ2_OSTYPE),Linux)
 LDFLAGS := -L/usr/lib -lm -ldl -rdynamic
@@ -272,12 +263,12 @@ endif
 # ----------
 
 # Phony targets
-.PHONY : all client game icon server ref_gl1 ref_gl3 ref_soft
+.PHONY : all client game icon server ref_gl ref_soft
 
 # ----------
 
 # Builds everything
-all: config client server game ref_gl1 ref_gl3 ref_soft
+all: config client server game ref_gl ref_soft
 
 # ----------
 
@@ -328,10 +319,6 @@ build/client/%.o: %.c
 
 bin/yquake2.exe : LDFLAGS += -mwindows
 
-ifeq ($(WITH_CURL),yes)
-bin/yquake2.exe : CFLAGS += -DUSE_CURL
-endif
-
 ifeq ($(WITH_OPENAL),yes)
 bin/yquake2.exe : CFLAGS += -DUSE_OPENAL -DDEFAULT_OPENAL_DRIVER='"openal32.dll"'
 endif
@@ -349,10 +336,6 @@ build/client/%.o: %.c
 	${Q}$(CC) -c $(CFLAGS) $(SDLCFLAGS) $(ZIPCFLAGS) $(INCLUDE) -o $@ $<
 
 bin/quake2 : CFLAGS += -Wno-unused-result
-
-ifeq ($(WITH_CURL),yes)
-bin/quake2 : CFLAGS += -DUSE_CURL
-endif
 
 ifeq ($(WITH_OPENAL),yes)
 ifeq ($(YQ2_OSTYPE), OpenBSD)
@@ -426,61 +409,32 @@ endif
 
 # ----------
 
-# The OpenGL 1.x renderer lib
+# The OpenGL renderer lib
 
 ifeq ($(YQ2_OSTYPE), Windows)
 
-ref_gl1:
-	@echo "===> Building ref_gl1.dll"
-	$(MAKE) bin/ref_gl1.dll
+ref_gl:
+	@echo "===> Building ref_gl.dll"
+	$(MAKE) bin/ref_gl.dll
 
-bin/ref_gl1.dll : LDFLAGS += -lopengl32 -shared
+bin/ref_gl.dll : LDFLAGS += -lopengl32 -shared
 
 else # not Windows
 
-ref_gl1:
-	@echo "===> Building ref_gl1.so"
-	$(MAKE) bin/ref_gl1.so
+ref_gl:
+	@echo "===> Building ref_gl.so"
+	$(MAKE) bin/ref_gl.so
 
 
-bin/ref_gl1.so : CFLAGS += -fPIC
-bin/ref_gl1.so : LDFLAGS += -shared -lGL
+bin/ref_gl.so : CFLAGS += -fPIC
+bin/ref_gl.so : LDFLAGS += -shared -lGL
 
-endif # OS specific ref_gl1 stuff
+endif # OS specific ref_gl stuff
 
-build/ref_gl1/%.o: %.c
+build/ref_gl/%.o: %.c
 	@echo "===> CC $<"
 	${Q}mkdir -p $(@D)
 	${Q}$(CC) -c $(CFLAGS) $(SDLCFLAGS) $(INCLUDE) -o $@ $<
-
-# ----------
-
-# The OpenGL 3.x renderer lib
-
-ifeq ($(YQ2_OSTYPE), Windows)
-
-ref_gl3:
-	@echo "===> Building ref_gl3.dll"
-	$(MAKE) bin/ref_gl3.dll
-
-bin/ref_gl3.dll : LDFLAGS += -shared
-
-else # not Windows
-
-ref_gl3:
-	@echo "===> Building ref_gl3.so"
-	$(MAKE) bin/ref_gl3.so
-
-
-bin/ref_gl3.so : CFLAGS += -fPIC
-bin/ref_gl3.so : LDFLAGS += -shared
-
-endif # OS specific ref_gl3 stuff
-
-build/ref_gl3/%.o: %.c
-	@echo "===> CC $<"
-	${Q}mkdir -p $(@D)
-	${Q}$(CC) -c $(CFLAGS) $(SDLCFLAGS) $(INCLUDE) $(GLAD_INCLUDE) -o $@ $<
 
 # ----------
 
@@ -617,8 +571,6 @@ CLIENT_OBJS_ := \
 	src/client/cl_screen.o \
 	src/client/cl_tempentities.o \
 	src/client/cl_view.o \
-	src/client/curl/download.o \
-	src/client/curl/qcurl.o \
 	src/client/input/sdl.o \
 	src/client/menu/menu.o \
 	src/client/menu/qmenu.o \
@@ -680,22 +632,22 @@ endif
 
 # ----------
 
-REFGL1_OBJS_ := \
-	src/client/refresh/gl1/qgl.o \
-	src/client/refresh/gl1/gl1_draw.o \
-	src/client/refresh/gl1/gl1_image.o \
-	src/client/refresh/gl1/gl1_light.o \
-	src/client/refresh/gl1/gl1_lightmap.o \
-	src/client/refresh/gl1/gl1_main.o \
-	src/client/refresh/gl1/gl1_mesh.o \
-	src/client/refresh/gl1/gl1_misc.o \
-	src/client/refresh/gl1/gl1_model.o \
-	src/client/refresh/gl1/gl1_scrap.o \
-	src/client/refresh/gl1/gl1_surf.o \
-	src/client/refresh/gl1/gl1_warp.o \
-	src/client/refresh/gl1/gl1_sdl.o \
-	src/client/refresh/gl1/gl1_md2.o \
-	src/client/refresh/gl1/gl1_sp2.o \
+REFGL_OBJS_ := \
+	src/client/refresh/gl/qgl.o \
+	src/client/refresh/gl/gl_draw.o \
+	src/client/refresh/gl/gl_image.o \
+	src/client/refresh/gl/gl_light.o \
+	src/client/refresh/gl/gl_lightmap.o \
+	src/client/refresh/gl/gl_main.o \
+	src/client/refresh/gl/gl_mesh.o \
+	src/client/refresh/gl/gl_misc.o \
+	src/client/refresh/gl/gl_model.o \
+	src/client/refresh/gl/gl_scrap.o \
+	src/client/refresh/gl/gl_surf.o \
+	src/client/refresh/gl/gl_warp.o \
+	src/client/refresh/gl/gl_sdl.o \
+	src/client/refresh/gl/gl_md2.o \
+	src/client/refresh/gl/gl_sp2.o \
 	src/client/refresh/files/pcx.o \
 	src/client/refresh/files/stb.o \
 	src/client/refresh/files/wal.o \
@@ -704,43 +656,10 @@ REFGL1_OBJS_ := \
 	src/common/md4.o
 
 ifeq ($(YQ2_OSTYPE), Windows)
-REFGL1_OBJS_ += \
+REFGL_OBJS_ += \
 	src/backends/windows/shared/hunk.o
 else # not Windows
-REFGL1_OBJS_ += \
-	src/backends/unix/shared/hunk.o
-endif
-
-# ----------
-
-REFGL3_OBJS_ := \
-	src/client/refresh/gl3/gl3_draw.o \
-	src/client/refresh/gl3/gl3_image.o \
-	src/client/refresh/gl3/gl3_light.o \
-	src/client/refresh/gl3/gl3_lightmap.o \
-	src/client/refresh/gl3/gl3_main.o \
-	src/client/refresh/gl3/gl3_mesh.o \
-	src/client/refresh/gl3/gl3_misc.o \
-	src/client/refresh/gl3/gl3_model.o \
-	src/client/refresh/gl3/gl3_sdl.o \
-	src/client/refresh/gl3/gl3_surf.o \
-	src/client/refresh/gl3/gl3_warp.o \
-	src/client/refresh/gl3/gl3_shaders.o \
-	src/client/refresh/gl3/gl3_md2.o \
-	src/client/refresh/gl3/gl3_sp2.o \
-	src/client/refresh/gl3/glad/src/glad.o \
-	src/client/refresh/files/pcx.o \
-	src/client/refresh/files/stb.o \
-	src/client/refresh/files/wal.o \
-	src/client/refresh/files/pvs.o \
-	src/common/shared/shared.o \
-	src/common/md4.o
-
-ifeq ($(YQ2_OSTYPE), Windows)
-REFGL3_OBJS_ += \
-	src/backends/windows/shared/hunk.o
-else # not Windows
-REFGL3_OBJS_ += \
+REFGL_OBJS_ += \
 	src/backends/unix/shared/hunk.o
 endif
 
@@ -834,8 +753,7 @@ endif
 
 # Rewrite pathes to our object directory.
 CLIENT_OBJS = $(patsubst %,build/client/%,$(CLIENT_OBJS_))
-REFGL1_OBJS = $(patsubst %,build/ref_gl1/%,$(REFGL1_OBJS_))
-REFGL3_OBJS = $(patsubst %,build/ref_gl3/%,$(REFGL3_OBJS_))
+REFGL_OBJS = $(patsubst %,build/ref_gl/%,$(REFGL_OBJS_))
 REFSOFT_OBJS = $(patsubst %,build/ref_soft/%,$(REFSOFT_OBJS_))
 SERVER_OBJS = $(patsubst %,build/server/%,$(SERVER_OBJS_))
 GAME_OBJS = $(patsubst %,build/baseq2/%,$(GAME_OBJS_))
@@ -844,16 +762,14 @@ GAME_OBJS = $(patsubst %,build/baseq2/%,$(GAME_OBJS_))
 
 # Generate header dependencies.
 CLIENT_DEPS= $(CLIENT_OBJS:.o=.d)
-REFGL1_DEPS= $(REFGL1_OBJS:.o=.d)
-REFGL3_DEPS= $(REFGL3_OBJS:.o=.d)
+REFGL_DEPS= $(REFGL_OBJS:.o=.d)
 REFSOFT_DEPS= $(REFSOFT_OBJS:.o=.d)
 SERVER_DEPS= $(SERVER_OBJS:.o=.d)
 GAME_DEPS= $(GAME_OBJS:.o=.d)
 
 # Suck header dependencies in.
 -include $(CLIENT_DEPS)
--include $(REFGL1_DEPS)
--include $(REFGL3_DEPS)
+-include $(REFGL_DEPS)
 -include $(SERVER_DEPS)
 -include $(GAME_DEPS)
 
@@ -883,28 +799,16 @@ bin/q2ded : $(SERVER_OBJS)
 	${Q}$(CC) $(SERVER_OBJS) $(LDFLAGS) -o $@
 endif
 
-# bin/ref_gl1.so
+# bin/ref_gl.so
 ifeq ($(YQ2_OSTYPE), Windows)
-bin/ref_gl1.dll : $(REFGL1_OBJS)
+bin/ref_gl.dll : $(REFGL_OBJS)
 	@echo "===> LD $@"
-	${Q}$(CC) $(REFGL1_OBJS) $(LDFLAGS) $(DLL_SDLLDFLAGS) -o $@
+	${Q}$(CC) $(REFGL_OBJS) $(LDFLAGS) $(DLL_SDLLDFLAGS) -o $@
 	$(Q)strip $@
 else
-bin/ref_gl1.so : $(REFGL1_OBJS)
+bin/ref_gl.so : $(REFGL_OBJS)
 	@echo "===> LD $@"
-	${Q}$(CC) $(REFGL1_OBJS) $(LDFLAGS) $(SDLLDFLAGS) -o $@
-endif
-
-# bin/ref_gl3.so
-ifeq ($(YQ2_OSTYPE), Windows)
-bin/ref_gl3.dll : $(REFGL3_OBJS)
-	@echo "===> LD $@"
-	${Q}$(CC) $(REFGL3_OBJS) $(LDFLAGS) $(DLL_SDLLDFLAGS) -o $@
-	$(Q)strip $@
-else
-bin/ref_gl3.so : $(REFGL3_OBJS)
-	@echo "===> LD $@"
-	${Q}$(CC) $(REFGL3_OBJS) $(LDFLAGS) $(SDLLDFLAGS) -o $@
+	${Q}$(CC) $(REFGL_OBJS) $(LDFLAGS) $(SDLLDFLAGS) -o $@
 endif
 
 # bin/ref_soft.so

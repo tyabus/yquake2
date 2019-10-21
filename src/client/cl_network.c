@@ -346,13 +346,6 @@ CL_Disconnect(void)
 		cls.download = NULL;
 	}
 
-#ifdef USE_CURL
-	CL_CancelHTTPDownloads(true);
-	cls.downloadReferer[0] = 0;
-	cls.downloadname[0] = 0;
-	cls.downloadposition = 0;
-#endif
-
 	cls.state = ca_disconnected;
 
 	snd_is_underwater = false;
@@ -446,13 +439,6 @@ CL_Changing_f(void)
 	SCR_BeginLoadingPlaque();
 	cls.state = ca_connected; /* not active anymore, but not disconnected */
 	Com_Printf("\nChanging map...\n");
-
-#ifdef USE_CURL
-	if (cls.downloadServerRetry[0] != 0)
-	{
-		CL_SetHTTPServer(cls.downloadServerRetry);
-	}
-#endif
 }
 
 /*
@@ -594,7 +580,6 @@ CL_ConnectionlessPacket(void)
 		}
 
 		Netchan_Setup(NS_CLIENT, &cls.netchan, net_from, cls.quakePort);
-		char *buff = NET_AdrToString(cls.netchan.remote_address);
 
 		for(int i = 1; i < Cmd_Argc(); i++)
 		{
@@ -602,18 +587,7 @@ CL_ConnectionlessPacket(void)
 
 			if(!strncmp(p, "dlserver=", 9))
 			{
-#ifdef USE_CURL
-				p += 9;
-				Com_sprintf(cls.downloadReferer, sizeof(cls.downloadReferer), "quake2://%s", buff);
-				CL_SetHTTPServer (p);
-
-				if (cls.downloadServer[0])
-				{
-					Com_Printf("HTTP downloading enabled, URL: %s\n", cls.downloadServer);
-				}
-#else
 				Com_Printf("HTTP downloading supported by server but not the client.\n");
-#endif
 			}
 		}
 

@@ -36,11 +36,6 @@
 #include <sys/stat.h>
 #include <sys/select.h> /* for fd_set */
 
-#ifdef __APPLE__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
-
 #include "../../common/header/common.h"
 #include "../../common/header/glob.h"
 
@@ -162,20 +157,6 @@ Sys_ConsoleOutput(char *string)
 long long
 Sys_Microseconds(void)
 {
-#ifdef __APPLE__
-	// OSX didn't have clock_gettime() until recently, so use Mach's clock_get_time()
-	// instead. fortunately its mach_timespec_t seems identical to POSIX struct timespec
-	// so lots of code can be shared
-	clock_serv_t cclock;
-	mach_timespec_t now;
-	static mach_timespec_t first;
-
-	host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-	clock_get_time(cclock, &now);
-	mach_port_deallocate(mach_task_self(), cclock);
-
-#else // not __APPLE__ - other Unix-likes will hopefully support clock_gettime()
-
 	struct timespec now;
 	static struct timespec first;
 #ifdef _POSIX_MONOTONIC_CLOCK
@@ -183,8 +164,6 @@ Sys_Microseconds(void)
 #else
 	clock_gettime(CLOCK_REALTIME, &now);
 #endif
-
-#endif // not __APPLE__
 
 	if(first.tv_sec == 0)
 	{
@@ -344,11 +323,7 @@ Sys_GetGameAPI(void *parms)
 	char name[MAX_OSPATH];
 	char *path;
 	char *str_p;
-#ifdef __APPLE__
-	const char *gamename = "game.dylib";
-#else
 	const char *gamename = "game.so";
-#endif
 
 	if (game_library)
 	{

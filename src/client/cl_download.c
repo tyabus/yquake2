@@ -74,32 +74,7 @@ CL_RequestNextDownload(void)
 	char fn[MAX_OSPATH];
 	dmdl_t *pheader;
 
-	if (precacherIteration == 0)
-	{
-#if USE_CURL
-		// r1q2-style URLs.
-		Q_strlcpy(dlquirks.gamedir, cl.gamedir, sizeof(dlquirks.gamedir));
-#endif
-	}
-	else if (precacherIteration == 1)
-	{
-#if USE_CURL
-		// q2pro-style URLs.
-		if (cl.gamedir[0] == '\0')
-		{
-			Q_strlcpy(dlquirks.gamedir, BASEDIRNAME, sizeof(dlquirks.gamedir));
-		}
-		else
-		{
-			Q_strlcpy(dlquirks.gamedir, cl.gamedir, sizeof(dlquirks.gamedir));
-		}
-
-		// Force another try with the filelist.
-		dlquirks.filelist = true;
-		gamedirForFilelist = true;
-#endif
-	}
-	else if (precacherIteration == 2)
+	if (precacherIteration == 2)
 	{
 		// UDP Fallback.
 		forceudp = true;
@@ -159,14 +134,6 @@ CL_RequestNextDownload(void)
 
 					precache_model_skin = 1;
 				}
-
-#ifdef USE_CURL
-				/* Wait for the models to download before checking * skins. */
-				if (CL_PendingHTTPDownloads())
-				{
-					return;
-				}
-#endif
 
 				/* checking for skins in the model */
 				if (!precache_model)
@@ -400,27 +367,6 @@ CL_RequestNextDownload(void)
 		}
 	}
 
-
-#ifdef USE_CURL
-	/* Wait for pending downloads. */
-	if (CL_PendingHTTPDownloads())
-	{
-		return;
-	}
-
-
-	if (dlquirks.error)
-	{
-		dlquirks.error = false;
-
-		/* Mkay, there were download errors. Let's start over. */
-		precacherIteration++;
-		CL_ResetPrecacheCheck();
-		CL_RequestNextDownload();
-		return;
-	}
-#endif
-
 	/* precache phase completed */
 	precache_check = ENV_CNT;
 
@@ -498,23 +444,11 @@ CL_RequestNextDownload(void)
 		precache_check = TEXTURE_CNT + 999;
 	}
 
-#ifdef USE_CURL
-	/* Wait for pending downloads. */
-	if (CL_PendingHTTPDownloads())
-	{
-		return;
-	}
-#endif
-
 	/* This map is done, start over for next map. */
 	forceudp = false;
 	precacherIteration = 0;
 	gamedirForFilelist = false;
 	httpSecondChance = true;
-
-#ifdef USE_CURL
-	dlquirks.filelist = true;
-#endif
 
 	CL_RegisterSounds();
 	CL_PrepRefresh();
@@ -567,51 +501,6 @@ CL_CheckOrDownloadFile(char *filename)
 		return true;
 	}
 
-#ifdef USE_CURL
-	if (!forceudp)
-	{
-		if (CL_QueueHTTPDownload(filename, gamedirForFilelist))
-		{
-			/* We return true so that the precache check
-			   keeps feeding us more files. Since we have
-			   multiple HTTP connections we want to
-			   minimize latency and be constantly sending
-			   requests, not one at a time. */
-			return true;
-		}
-	}
-	else
-	{
-		/* There're 2 cases:
-			- forceudp was set after a 404. In this case we
-			  want to retry that single file over UDP and
-			  all later files over HTTP.
-			- forceudp was set after another error code.
-			  In that case the HTTP code aborts all HTTP
-			  downloads and CL_QueueHTTPDownload() returns
-			  false. */
-		forceudp = false;
-
-		/* This is one of the nasty special cases. A r1q2
-		   server might miss only one file. This missing
-		   file may lead to a fallthrough to q2pro URLs,
-		   since it isn't a q2pro server all files would
-		   yield error 404 and we're falling back to UDP
-		   downloads. To work around this we need to start
-		   over with the r1q2 case and see what happens.
-		   But we can't do that unconditionally, because
-		   we would run in endless loops r1q2 -> q2pro ->
-		   UDP -> r1q2. So hack in a variable that allows
-		   for one and only one second chance. If the r1q2
-		   server is missing more than file we've lost and
-		   we're doing unnecessary UDP downloads. */
-		if (httpSecondChance)
-		{
-			precacherIteration = 0;
-			httpSecondChance = false;
-		}
-	}
-#endif
 	strcpy(cls.downloadname, filename);
 
 	/* download to a temp name, and only rename

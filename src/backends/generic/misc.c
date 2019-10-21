@@ -41,10 +41,6 @@
 #include <windows.h> // GetModuleFileNameA()
 #endif
 
-#ifdef __APPLE__
-#include <mach-o/dyld.h> // _NSGetExecutablePath
-#endif
-
 #ifndef PATH_MAX
 // this is mostly for windows. windows has a MAX_PATH = 260 #define, but allows
 // longer paths anyway.. this might not be the maximum allowed length, but is
@@ -105,19 +101,6 @@ static void SetExecutablePath(char* exePath)
 		// an error occured, clear exe path
 		exePath[0] = '\0';
 	}
-
-#elif defined(__APPLE__)
-
-	uint32_t bufSize = PATH_MAX;
-	if(_NSGetExecutablePath(exePath, &bufSize) != 0)
-	{
-		// WTF, PATH_MAX is not enough to hold the path?
-		// an error occured, clear exe path
-		exePath[0] = '\0';
-	}
-
-	// TODO: realpath() ?
-	// TODO: no idea what this is if the executable is in an app bundle
 
 #else
 

@@ -94,9 +94,7 @@
  * Older operating systen and architecture detection
  * macros, implemented by savegame version YQ2-1.
  */
-#if defined(__APPLE__)
-#define OSTYPE_1 "MacOS X"
-#elif defined(__FreeBSD__)
+#if defined(__FreeBSD__)
 #define OSTYPE_1 "FreeBSD"
 #elif defined(__OpenBSD__)
 #define OSTYPE_1 "OpenBSD"

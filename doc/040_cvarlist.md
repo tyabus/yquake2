@@ -7,9 +7,7 @@ have been renamed. The prefixes are:
 
 * No prefix: General stuff.
 * `cl_`: Client.
-* `gl_`: Common to all OpenGL renderers.
-* `gl1_`: OpenGL 1.4 renderer.
-* `gl3_`: OpenGL 3.2 renderer.
+* `gl_`: OpenGL renderer.
 * `ogg_`: Ogg/Vorbis music playback.
 * `r_`: Common to all renderers.
 * `s_`: Sound system.
@@ -122,8 +120,7 @@ it's `+set busywait 0` (setting the `busywait` cvar) and `-portable`
   has 59.95hz.
 
 * **vid_renderer**: Selects the renderer library. Possible options are
-  `gl1` (the default) for the old OpenGL 1.4 renderer, `gl3` for the new
-  OpenGL 3.2 renderer and `soft` for the software renderer.
+  `gl` (the default) for the OpenGL 1.4 renderer, and `soft` for the software renderer.
 
 * **cin_force43**: If set to `1` (the default) cinematics are displayed
   with an aspect ratio of 4:3, regardless what the actual windows size
@@ -218,53 +215,20 @@ it's `+set busywait 0` (setting the `busywait` cvar) and `-portable`
   things better or worse, depending on the map.
 
 
-## Graphics (OpenGL 1.4 only)
+## Graphics (OpenGL 1.4)
 
-* **gl1_intensity**: Sets the color intensity. Must be a floating point
+* **gl_intensity**: Sets the color intensity. Must be a floating point
   value, at least `1.0` - default is `2.0`. Applied when textures are
   loaded, so it needs a `vid_restart`.
 
-* **gl1_overbrightbits**: Enables overbright bits, brightness scaling of
+* **gl_overbrightbits**: Enables overbright bits, brightness scaling of
   lightmaps and models. Higher values make shadows less dark. Possible
   values are `0` (no overbright bits), `1` (more correct lighting for
   water), `2` (scale by factor 2) and `3` (scale by factor 3). Applied
   in realtime, does not need `vid_restart`.
 
-* **gl1_stencilshadow**: If `gl_shadows` is set to `1`, this makes them
+* **gl_stencilshadow**: If `gl_shadows` is set to `1`, this makes them
   look a bit better (no flickering) by using the stencil buffer.
-
-
-## Graphics (OpenGL 3.2 only)
-
-* **gl3_debugcontext**: Enables the OpenGL 3.2 renderers debug context,
-  e.g. prints warnings and errors emitted by the GPU driver.  Not
-  supported on macOS. This is a pure debug cvar and slows down
-  rendering.
-
-* **gl3_intensity**: Sets the color intensity used for 3D rendering.
-  Similar to OpenGL 1.4 `gl1_intensity`, but more flexible: can be any
-  value between 0.0 (completely dark) and 256.0 (very bright).  Good
-  values are between `1.0` and `2.0`, default is `1.5`.  Applied in
-  realtime via shader, so it does not need a `vid_restart`.
-
-* **gl3_intensity_2D**: The same for 2D rendering (HUD, menu, console,
-  videos)
-
-* **gl3_overbrightbits**: Enables overbright bits, brightness scaling of
-  lightmaps and models. Higher values make shadows less dark. Similar
-  to OpenGL 1.4 `gl1_overbrightbits`, but allows any floating point
-  number.  Default is `1.3`. In the OpenGL 3.2 renderer, no lighting
-  fixes for water are needed, so `1.0` has no special meaning.
-
-* **gl3_particle_size**: The size of particles - Default is `40`.
-
-* **gl3_particle_fade_factor**: "softness" of particles: higher values
-  look less soft. Defaults to `1.2`. A value of `10` looks similar to
-  the OpenGL 1.4 particles.
-
-* **gl3_particle_square**: If set to `1`, particles are rendered as
-  squares, like in the old software renderer or Quake 1. Default is `0`.
-
 
 ## cvar operations
 

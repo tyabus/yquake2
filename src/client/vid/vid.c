@@ -338,9 +338,7 @@ VID_LoadRenderer(void)
 	refimport_t	ri;
 	GetRefAPI_t	GetRefAPI;
 
-#ifdef __APPLE__
-	const char* lib_ext = "dylib";
-#elif defined(_WIN32)
+#if defined(_WIN32)
 	const char* lib_ext = "dll";
 #else
 	const char* lib_ext = "so";
@@ -457,13 +455,8 @@ VID_CheckChanges(void)
 		// Mkay, let's try our luck.
 		while (!VID_LoadRenderer())
 		{
-			// We try: gl3 -> gl1 -> soft.
-			if (strcmp(vid_renderer->string, "gl3") == 0)
-			{
-				Com_Printf("Retrying with gl1...\n");
-				Cvar_Set("vid_renderer", "gl1");
-			}
-			else if (strcmp(vid_renderer->string, "gl1") == 0)
+			// We try: gl -> soft.
+			if (strcmp(vid_renderer->string, "gl") == 0)
 			{
 				Com_Printf("Retrying with soft...\n");
 				Cvar_Set("vid_renderer", "soft");
@@ -476,8 +469,8 @@ VID_CheckChanges(void)
 			else
 			{
 				// User forced something stupid.
-				Com_Printf("Retrying with gl3...\n");
-				Cvar_Set("vid_renderer", "gl3");
+				Com_Printf("Retrying with gl...\n");
+				Cvar_Set("vid_renderer", "gl");
 			}
 		}
 
@@ -495,7 +488,7 @@ VID_Init(void)
 	// Console variables
 	vid_gamma = Cvar_Get("vid_gamma", "1.0", CVAR_ARCHIVE);
 	vid_fullscreen = Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
-	vid_renderer = Cvar_Get("vid_renderer", "gl1", CVAR_ARCHIVE);
+	vid_renderer = Cvar_Get("vid_renderer", "gl", CVAR_ARCHIVE);
 
 	// Commands
 	Cmd_AddCommand("vid_restart", VID_Restart_f);

@@ -41,11 +41,6 @@
  #define MAP_ANONYMOUS MAP_ANON
 #endif
 
-#if defined(__APPLE__)
- #include <sys/types.h>
- #define MAP_ANONYMOUS MAP_ANON
-#endif
-
 byte *membase;
 size_t maxhunksize;
 size_t curhunksize;

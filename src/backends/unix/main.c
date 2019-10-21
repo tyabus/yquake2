@@ -89,11 +89,10 @@ main(int argc, char **argv)
 	   minded or stupid people even think about it. :) */
 	if (getuid() == 0)
 	{
-		printf("Quake II shouldn't be run as root! Backing out to save your ass. If\n");
-		printf("you really know what you're doing, edit src/unix/main.c and remove\n");
-		printf("this check. But don't complain if Quake II eats your dog afterwards!\n");
-
-		return 1;
+		printf("Quake II shouldn't be run as root! Backing out to save your ass.\n");
+		printf("But don't complain if Quake II eats your dog afterwards!\n");
+		printf("PRESS CTRL+C IF YOU DON'T WANT TO CONTINUE\n");
+		sleep(3);
 	}
 
 	// Enforce the real UID to prevent setuid crap

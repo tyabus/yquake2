@@ -49,7 +49,6 @@
 
 #include "../../common/header/common.h"
 
-#include "../curl/header/download.h"
 #include "../sound/header/sound.h"
 #include "../sound/header/vorbis.h"
 #include "../vid/header/ref.h"
@@ -267,9 +266,9 @@ extern client_static_t	cls;
 extern int num_power_sounds;
 
 /* cvars */
-extern	cvar_t	*gl1_stereo_separation;
-extern	cvar_t	*gl1_stereo_convergence;
-extern	cvar_t	*gl1_stereo;
+extern	cvar_t	*gl_stereo_separation;
+extern	cvar_t	*gl_stereo_convergence;
+extern	cvar_t	*gl_stereo;
 extern	cvar_t	*cl_gun;
 extern	cvar_t	*cl_add_blend;
 extern	cvar_t	*cl_add_lights;

@@ -80,9 +80,9 @@ cvar_t *hand;
 cvar_t *gender;
 cvar_t *gender_auto;
 
-cvar_t	*gl1_stereo;
-cvar_t	*gl1_stereo_separation;
-cvar_t	*gl1_stereo_convergence;
+cvar_t	*gl_stereo;
+cvar_t	*gl_stereo_separation;
+cvar_t	*gl_stereo_convergence;
 
 cvar_t *cl_vwep;
 
@@ -532,9 +532,9 @@ CL_InitLocal(void)
 	cl_paused = Cvar_Get("paused", "0", 0);
 	cl_loadpaused = Cvar_Get("cl_loadpaused", "1", CVAR_ARCHIVE);
 
-	gl1_stereo = Cvar_Get( "gl1_stereo", "0", CVAR_ARCHIVE );
-	gl1_stereo_separation = Cvar_Get( "gl1_stereo_separation", "1", CVAR_ARCHIVE );
-	gl1_stereo_convergence = Cvar_Get( "gl1_stereo_convergence", "1.4", CVAR_ARCHIVE );
+	gl_stereo = Cvar_Get( "gl_stereo", "0", CVAR_ARCHIVE );
+	gl_stereo_separation = Cvar_Get( "gl_stereo_separation", "1", CVAR_ARCHIVE );
+	gl_stereo_convergence = Cvar_Get( "gl_stereo_convergence", "1.4", CVAR_ARCHIVE );
 
 	rcon_client_password = Cvar_Get("rcon_password", "", 0);
 	rcon_address = Cvar_Get("rcon_address", "", 0);
@@ -559,13 +559,6 @@ CL_InitLocal(void)
 	Cvar_Get("spectator", "0", CVAR_USERINFO);
 
 	cl_vwep = Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
-
-#ifdef USE_CURL
-	cl_http_proxy = Cvar_Get("cl_http_proxy", "", 0);
-	cl_http_filelists = Cvar_Get("cl_http_filelists", "1", 0);
-	cl_http_downloads = Cvar_Get("cl_http_downloads", "1", CVAR_ARCHIVE);
-	cl_http_max_connections = Cvar_Get("cl_http_max_connections", "4", 0);
-#endif
 
 	/* register our commands */
 	Cmd_AddCommand("cmd", CL_ForwardToServer_f);
@@ -786,14 +779,6 @@ CL_Frame(int packetdelta, int renderdelta, int timedelta, qboolean packetframe, 
 		}
 	}
 
-	// Run HTTP downloads more often while connecting.
-#ifdef USE_CURL
-	if (cls.state == ca_connected)
-	{
-		CL_RunHTTPDownloads();
-	}
-#endif
-
 	// Update input stuff.
 	if (packetframe || renderframe)
 	{
@@ -823,11 +808,6 @@ CL_Frame(int packetdelta, int renderdelta, int timedelta, qboolean packetframe, 
 	{
 		CL_SendCmd();
 		CL_CheckForResend();
-
-		// Run HTTP downloads during game.
-#ifdef USE_CURL
-		CL_RunHTTPDownloads();
-#endif
 	}
 
 	if (renderframe)
@@ -922,10 +902,6 @@ CL_Init(void)
 
 	M_Init();
 
-#ifdef USE_CURL
-	CL_InitHTTPDownloads();
-#endif
-
 	cls.disable_screen = true; /* don't draw yet */
 
 	CL_InitLocal();
@@ -947,10 +923,6 @@ CL_Shutdown(void)
 	}
 
 	isdown = true;
-
-#ifdef USE_CURL
-	CL_HTTP_Cleanup(true);
-#endif
 
 	CL_WriteConfiguration();
 
