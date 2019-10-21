@@ -1,5 +1,9 @@
 /build/
-/release/
+/bin/
+*.bak
+*.so
+*.save
+*.swp
 *.mk
 *.user
 *.d

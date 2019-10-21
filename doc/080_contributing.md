@@ -22,7 +22,7 @@ Some rules to follow:
   dependencies. If in doubt, because you really need that nice little
   library, ask.
 * Make sure that your code is compiling without warnings with at least
-  current versions of GCC and Clang. Also make sure that it's working on
+  current version of GCC. Also make sure that it's working on
   both unixoid platforms and Windows.
 * Don't do unnecessary cleanups. Yes, your linter or sanity checker may
   complain. But that's your problem and not ours. Cleanups often bring
